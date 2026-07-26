@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Usage Tracker — Help</title>
+<style>
+  :root {
+    --green: #34C759;
+    --bg: #ffffff;
+    --fg: #1d1d1f;
+    --muted: #6e6e73;
+    --card: #f5f5f7;
+    --border: rgba(0,0,0,0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1e1e1e;
+      --fg: #f2f2f7;
+      --muted: #9a9aa0;
+      --card: #2a2a2c;
+      --border: rgba(255,255,255,0.10);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    margin: 0;
+    padding: 32px 40px 64px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 34px 0 10px; }
+  p, li { color: var(--fg); }
+  .lead { color: var(--muted); margin-top: 0; }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 1px 5px;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 0.9em;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 14px 0;
+  }
+  .muted { color: var(--muted); }
+  ul { padding-left: 20px; }
+  li { margin: 4px 0; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: middle; margin-right: 4px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+</style>
+</head>
+<body>
+
+<h1>Claude Usage Tracker</h1>
+<p class="lead">A floating panel that keeps your Claude.ai usage limits in view.</p>
+
+<h2>The floating panel</h2>
+<p>Each row is one usage window:</p>
+<ul>
+  <li><strong>Session</strong> — your rolling 5-hour limit (all models).</li>
+  <li><strong>Weekly</strong> — your overall 7-day limit across all models combined (Opus, Sonnet and Haiku).</li>
+  <li><strong>Weekly (Opus)</strong> — a separate weekly cap that applies to Opus only; appears when Opus tracking is enabled (see Additional Tracking).</li>
+  <li><strong>Weekly (Fable)</strong> — appears when Fable tracking is enabled (see Additional Tracking).</li>
+</ul>
+<div class="card">
+  <p style="margin-top:0"><strong>Reading a bar</strong></p>
+  <ul>
+    <li>The <strong>filled bar</strong> and the percentage show how much of that window you've used.</li>
+    <li>The thin <strong>vertical marker</strong> shows how far you are through the window <em>time-wise</em> — if the fill is behind the marker, you're pacing comfortably; ahead of it, you're using faster than the clock.</li>
+    <li>The <strong>“resets in …” pill</strong> counts down to when that window refreshes.</li>
+    <li>Colour: bars use your chosen colour in the normal range and switch to
+      <span class="dot" style="background:#ff9500"></span>amber from 75% and
+      <span class="dot" style="background:#ff3b30"></span>red from 90%, so warnings always stand out.</li>
+  </ul>
+</div>
+
+<h2>Menu bar &amp; “Always on top”</h2>
+<p>Use the <strong>Always on top</strong> switch in the panel header to keep the panel floating above other windows. When it's off, the panel hides and you summon it by clicking the menu-bar icon. Left-click the icon to show/hide the panel; right-click it for Settings and Quit.</p>
+
+<hr>
+
+<h2>Settings</h2>
+<p>Open Settings from the gear in the panel footer, or the menu-bar icon's right-click menu. It has five sections:</p>
+
+<h2>Connect</h2>
+<p>Click <strong>Sign in to Claude.ai</strong> to connect your account so the app can read your usage — nothing is sent anywhere else. The pill shows whether you're connected, and <strong>Sign out of Claude</strong> disconnects. Advanced users can paste a <code>sessionKey</code> value manually.</p>
+
+<h2>Additional Tracking</h2>
+<ul>
+  <li><strong>Track API spend</strong> — enable and paste an Admin API key (<code>sk-ant-admin…</code>) to show your month-to-date API spend in the panel.</li>
+  <li><strong>Track Opus weekly usage</strong> — adds a <em>Weekly (Opus)</em> row for the separate weekly cap that applies to Opus only (it also still counts toward your overall Weekly).</li>
+  <li><strong>Track Fable weekly usage</strong> — adds a <em>Weekly (Fable)</em> row mirroring the per-model Fable limit shown in the Claude app.</li>
+</ul>
+
+<h2>General</h2>
+<ul>
+  <li><strong>Menu bar shows</strong> — choose whether the menu-bar percentage reflects your <strong>Session</strong> or <strong>Weekly</strong> limit.</li>
+  <li><strong>Refresh interval</strong> — how often usage is fetched (10–300 s).</li>
+  <li><strong>Threshold notifications</strong> — get notified when a window crosses 75 / 90 / 95%.</li>
+  <li><strong>Launch at login</strong> — start the app automatically when you log in.</li>
+</ul>
+
+<h2>Appearance</h2>
+<ul>
+  <li><strong>Always on top</strong> — keep the panel above other windows (or hide it until summoned).</li>
+  <li><strong>Bar colour</strong> — pick the normal-range colour for the bars:
+    <span class="dot" style="background:#34C759"></span>Green,
+    <span class="dot" style="background:#c15f3c"></span>Claude, or
+    <span class="dot" style="background:#1591EA"></span>Blue. Amber and red still appear as usage gets high. The Settings accent follows your choice.</li>
+  <li><strong>Show menu bar icon</strong> — toggle the menu-bar icon (kept on while “Always on top” is off, so the panel stays reachable).</li>
+  <li><strong>Appearance mode</strong> — System, Light, or Dark for the whole app.</li>
+  <li><strong>Panel opacity</strong> — make the floating panel more see-through.</li>
+</ul>
+
+<h2>About &amp; Help</h2>
+<p>Shows the app version, this help guide (<strong>Open Help</strong>), a link to the latest online guide, and the CramerLabs site.</p>
+
+<hr>
+
+<h2>Status</h2>
+<p>The coloured dot in the panel footer reflects Claude's service status. Click it to open <a href="https://status.claude.com/">status.claude.com</a>.</p>
+
+<hr>
+<p class="muted">The latest online version of this guide is at
+<a href="https://cosmo-nz.github.io/Floating-Claude-Usage-Tracker/">cosmo-nz.github.io/Floating-Claude-Usage-Tracker</a>.</p>
+
+</body>
+</html>
