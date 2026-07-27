@@ -75,3 +75,7 @@ builds the drag-to-install DMG.
 gh release create v1.0.0 "build/Floating Claude Usage Tracker.dmg" \
   --title "v1.0.0" --notes "First public build."
 ```
+
+## License
+
+[MIT](LICENSE) © CramerLabs. Unofficial; not affiliated with or endorsed by Anthropic.
