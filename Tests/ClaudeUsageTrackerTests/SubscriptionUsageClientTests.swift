@@ -70,6 +70,50 @@ final class SubscriptionUsageClientTests: XCTestCase {
         XCTAssertEqual(result.sevenDayOpus?.windowLength, 7 * 24 * 3600)
     }
 
+    func testRetryingOnBlockRetriesThenSucceeds() async throws {
+        final class Counter { var n = 0 }
+        let c = Counter()
+        let result = try await SubscriptionUsageClient.retryingOnBlock(attempts: 3, baseDelayMs: 0) { () -> String in
+            c.n += 1
+            if c.n < 3 { throw SubscriptionUsageClient.SubscriptionError.blocked }
+            return "ok"
+        }
+        XCTAssertEqual(result, "ok")
+        XCTAssertEqual(c.n, 3)
+    }
+
+    func testRetryingOnBlockPropagatesOtherErrorsImmediately() async {
+        final class Counter { var n = 0 }
+        let c = Counter()
+        do {
+            _ = try await SubscriptionUsageClient.retryingOnBlock(attempts: 3, baseDelayMs: 0) { () -> String in
+                c.n += 1
+                throw SubscriptionUsageClient.SubscriptionError.unauthorized
+            }
+            XCTFail("expected unauthorized to propagate")
+        } catch SubscriptionUsageClient.SubscriptionError.unauthorized {
+            XCTAssertEqual(c.n, 1)  // not retried
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+    }
+
+    func testRetryingOnBlockGivesUpAfterAttempts() async {
+        final class Counter { var n = 0 }
+        let c = Counter()
+        do {
+            _ = try await SubscriptionUsageClient.retryingOnBlock(attempts: 3, baseDelayMs: 0) { () -> String in
+                c.n += 1
+                throw SubscriptionUsageClient.SubscriptionError.blocked
+            }
+            XCTFail("expected blocked after exhausting retries")
+        } catch SubscriptionUsageClient.SubscriptionError.blocked {
+            XCTAssertEqual(c.n, 3)
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+    }
+
     func testParseDateHandlesFractionalSecondsAndOffset() {
         XCTAssertNotNil(SubscriptionUsageClient.parseDate("2026-07-06T03:00:00.249261+00:00"))
         XCTAssertNotNil(SubscriptionUsageClient.parseDate("2026-07-06T03:00:00.249+00:00"))

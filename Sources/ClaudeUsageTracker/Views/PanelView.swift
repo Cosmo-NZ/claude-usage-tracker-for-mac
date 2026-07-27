@@ -9,13 +9,13 @@ struct PanelView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             header
-            UsageBar(kind: .fiveHour, usage: store.snapshot.fiveHour, hasError: subscriptionError, tint: tint)
-            UsageBar(kind: .sevenDay, usage: store.snapshot.sevenDay, hasError: subscriptionError, tint: tint)
+            UsageBar(kind: .fiveHour, usage: store.snapshot.fiveHour, hasError: subscriptionError, errorMessage: subscriptionErrorMessage, tint: tint)
+            UsageBar(kind: .sevenDay, usage: store.snapshot.sevenDay, hasError: subscriptionError, errorMessage: subscriptionErrorMessage, tint: tint)
             if settings.trackOpus {
-                UsageBar(kind: .sevenDayOpus, usage: store.snapshot.sevenDayOpus, hasError: subscriptionError, tint: tint, emptyText: "Nothing reported")
+                UsageBar(kind: .sevenDayOpus, usage: store.snapshot.sevenDayOpus, hasError: subscriptionError, errorMessage: subscriptionErrorMessage, tint: tint, emptyText: "Nothing reported")
             }
             if settings.trackFable {
-                UsageBar(kind: .weeklyFable, usage: store.snapshot.weeklyFable, hasError: subscriptionError, tint: tint, emptyText: "Nothing reported")
+                UsageBar(kind: .weeklyFable, usage: store.snapshot.weeklyFable, hasError: subscriptionError, errorMessage: subscriptionErrorMessage, tint: tint, emptyText: "Nothing reported")
             }
             if settings.spendEnabled { spendRow }
             Divider()
@@ -99,6 +99,10 @@ struct PanelView: View {
     // MARK: - Helpers
 
     private var subscriptionError: Bool { store.snapshot.sourceErrors[.subscription] != nil }
+
+    private var subscriptionErrorMessage: String? {
+        store.snapshot.sourceErrors[.subscription].map { "Couldn't refresh: \($0)" }
+    }
 
     private var tint: Color { settings.barTint.color }
 

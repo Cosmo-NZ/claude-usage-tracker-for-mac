@@ -3,10 +3,12 @@ import Foundation
 struct SubscriptionUsageClient: SubscriptionProviding {
     enum SubscriptionError: Error, LocalizedError {
         case unauthorized
+        case blocked
         case noOrganization
         var errorDescription: String? {
             switch self {
-            case .unauthorized: return "Session key expired — reconnect Claude.ai"
+            case .unauthorized: return "Session key expired (401) — reconnect Claude.ai"
+            case .blocked: return "Blocked by Claude.ai (403) — bot protection or rate limiting; usually clears shortly"
             case .noOrganization: return "No organization found for this session"
             }
         }
@@ -23,15 +25,40 @@ struct SubscriptionUsageClient: SubscriptionProviding {
     }
 
     func fetchUsage() async throws -> SubscriptionUsage {
-        let orgID = try await fetchOrgID()
-        let url = URL(string: "https://claude.ai/api/organizations/\(orgID)/usage")!
-        let data: Data
-        do {
-            data = try await HTTP.get(url, headers: commonHeaders, debugLabel: "usage")
-        } catch let e as HTTPError where e.status == 401 || e.status == 403 {
-            throw SubscriptionError.unauthorized
+        // Claude.ai sits behind Cloudflare, which intermittently 403s our requests.
+        // A 403 clears on its own, so retry a couple of times with a short back-off
+        // before surfacing it (avoids flagging the panel for a transient blip).
+        try await Self.retryingOnBlock {
+            let orgID = try await self.fetchOrgID()
+            let url = URL(string: "https://claude.ai/api/organizations/\(orgID)/usage")!
+            let data: Data
+            do {
+                data = try await HTTP.get(url, headers: self.commonHeaders, debugLabel: "usage")
+            } catch let e as HTTPError where e.status == 401 {
+                throw SubscriptionError.unauthorized
+            } catch let e as HTTPError where e.status == 403 {
+                throw SubscriptionError.blocked
+            }
+            return try Self.parseUsage(data, now: Date())
         }
-        return try Self.parseUsage(data, now: Date())
+    }
+
+    /// Retries `op` when it throws `SubscriptionError.blocked` (an intermittent Cloudflare
+    /// 403), with a short escalating back-off. Any other error propagates immediately.
+    static func retryingOnBlock<T>(attempts: Int = 3, baseDelayMs: Int = 600,
+                                   _ op: () async throws -> T) async throws -> T {
+        var lastError: Error = SubscriptionError.blocked
+        for attempt in 1...max(1, attempts) {
+            do {
+                return try await op()
+            } catch SubscriptionError.blocked {
+                lastError = SubscriptionError.blocked
+                if attempt < attempts {
+                    try? await Task.sleep(for: .milliseconds(baseDelayMs * attempt))
+                }
+            }
+        }
+        throw lastError
     }
 
     private func fetchOrgID() async throws -> String {
@@ -39,8 +66,10 @@ struct SubscriptionUsageClient: SubscriptionProviding {
         let data: Data
         do {
             data = try await HTTP.get(url, headers: commonHeaders, debugLabel: "organizations")
-        } catch let e as HTTPError where e.status == 401 || e.status == 403 {
+        } catch let e as HTTPError where e.status == 401 {
             throw SubscriptionError.unauthorized
+        } catch let e as HTTPError where e.status == 403 {
+            throw SubscriptionError.blocked
         }
         return try Self.parseOrgID(data)
     }

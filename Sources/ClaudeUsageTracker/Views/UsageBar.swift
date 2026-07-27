@@ -4,6 +4,7 @@ struct UsageBar: View {
     let kind: WindowKind
     let usage: WindowUsage?
     let hasError: Bool
+    var errorMessage: String? = nil
     var tint: Color = .usageGreen
     var emptyText: String = "Not connected"
 
@@ -18,6 +19,7 @@ struct UsageBar: View {
                 if hasError {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundStyle(.yellow).font(.system(size: 11))
+                        .help(errorMessage ?? "Couldn't refresh — showing last known values.")
                 }
                 Spacer()
                 Text(usage.map { "\(Int($0.utilization * 100))%" } ?? "—")
