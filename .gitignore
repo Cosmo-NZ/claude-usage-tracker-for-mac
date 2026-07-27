@@ -1,0 +1,8 @@
+# Release script output (archives, exported app, DMG)
+build/
+
+# Xcode / macOS
+.DS_Store
+xcuserdata/
+*.xcuserstate
+DerivedData/
