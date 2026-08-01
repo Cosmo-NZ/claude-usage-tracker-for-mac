@@ -186,7 +186,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             onLaunchAtLoginChanged: { LoginItemManager.setEnabled($0) },
             onMenuBarChanged: { [weak self] _ in self?.updateMenuBarVisibility() })
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 640, height: 420),
+            contentRect: NSRect(x: 0, y: 0, width: 640, height: 440),
             styleMask: [.titled, .closable, .miniaturizable],
             backing: .buffered, defer: false)
         window.title = "Settings"

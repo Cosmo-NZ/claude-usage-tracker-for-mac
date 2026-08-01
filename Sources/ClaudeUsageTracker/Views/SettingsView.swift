@@ -31,10 +31,14 @@ struct SettingsView: View {
     @State private var sessionConnected = KeychainStore.shared.get(.sessionKey) != nil
 
     var body: some View {
-        NavigationSplitView {
+        HStack(spacing: 0) {
             sidebar
-        } detail: {
-            ScrollView { detail.padding(24).frame(maxWidth: .infinity, alignment: .leading) }
+                .frame(width: 200)
+                .frame(maxHeight: .infinity)
+            Divider()
+            ScrollView {
+                detail.padding(24).frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
         .tint(accent)
         .frame(width: 640, height: 440)
