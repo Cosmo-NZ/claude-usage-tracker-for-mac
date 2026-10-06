@@ -26,6 +26,10 @@ struct PanelView: View {
         // Match the Settings window's solid background (adapts to light/dark) rather than a
         // translucent material, so the panel and Settings look consistent.
         .background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 16))
+        // AppKit's isMovableByWindowBackground no longer reliably drags a borderless,
+        // non-activating panel whose content is SwiftUI, so drive the drag explicitly.
+        .gesture(WindowDragGesture())
+        .allowsWindowActivationEvents()
     }
 
     // MARK: - Header
